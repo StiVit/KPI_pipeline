@@ -1,0 +1,5 @@
+@src/kpi.py @src/main.py I want to have a CLI application where I can upload an excel file, pick what columns I want to keep and then pick the KPIs that I want to measure using those columns and click to start measuring, then those KPIs will be saved in an output file as charts. 
+
+I have a part of the kPI engine and process but I need to create the app and all the processes of picking columns / KPIs and propagate them to the code that will use them as inputs to do all the following measurements
+
+How can i do it?
