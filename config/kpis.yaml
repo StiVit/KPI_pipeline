@@ -1,0 +1,29 @@
+kpis:
+  - id: total_time
+    name: Total Time
+    type: aggregation
+    column: tempo_min
+    operation: sum
+    filters:
+      - column: tempo_min
+        operator: ">="
+        value: 0.5
+
+  - id: total_count
+    name: Total Count
+    type: count
+    column: numero_itg
+
+  - id: time_per_itg
+    name: Time per ITG
+    type: mixed
+    ref_kpi_1: total_time
+    ref_kpi_2: total_count
+    operation: divide
+
+  - id: area_group_by
+    name: Count Per Area 
+    groupby: area
+    type: groupby
+    column: numero_itg
+    operation: count
