@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import re
 
-def clean_data(df):
-    # TODO: later: Create a way to pick only the columns that need to stay, default keep all but then add an option to pick    
-    _required_columns = df.columns
+def clean_data(df, _required_columns=None):
+    if _required_columns is None:
+        _required_columns = df.columns
 
     df = df[_required_columns]
 
