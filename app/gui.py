@@ -5,6 +5,7 @@ from src.kpi_builder import KPIBuilder
 from src.kpi import KPIEngine
 from src.loader import load_data
 from src.processor import clean_data
+from src.visualization import visualize_kpis, get_output_path
 
 st.set_page_config(page_title="Dynamic KPI Generator", layout="wide")
 
@@ -22,6 +23,10 @@ if "selected_columns" not in st.session_state:
 
 if "step" not in st.session_state:
     st.session_state.step = 1
+
+if "filters" not in st.session_state:
+    st.session_state.filters = []
+
 
 # =====================================================
 # STEP 1 — UPLOAD EXCEL FILE
@@ -125,8 +130,6 @@ if st.session_state.step >= 4:
 
     use_filters = st.checkbox("Use Filter")
 
-    filters = []
-
     if use_filters:
         filter_column = st.selectbox(
             "Filter Column",
@@ -142,11 +145,17 @@ if st.session_state.step >= 4:
         filter_value = st.text_input("Filter value")
 
         if st.button("Add Filter"):
-            filters.append({
+            st.session_state.filters.append({
                 "column": filter_column,
                 "operator": filter_operator,
                 "value": filter_value
             })
+            st.success("Filter Added")
+        
+        if st.button("Remove Filters"):
+            st.session_state.filters = []
+            st.success("Filter Removed")
+
     
     # =====================================================
     # KPI TYPE FORMS
@@ -170,7 +179,7 @@ if st.session_state.step >= 4:
                 name=kpi_name,
                 column=column,
                 operation=operation,
-                filters=filters
+                filters=st.session_state.filters
             )
 
             st.success("Aggregation KPI created")
@@ -180,7 +189,7 @@ if st.session_state.step >= 4:
         if st.button("Create Count KPI"):
             st.session_state.builder.add_count(
                 name=kpi_name,
-                filters=filters
+                filters=st.session_state.filters
             )
 
             st.success("Count KPI created")
@@ -212,7 +221,7 @@ if st.session_state.step >= 4:
                 groupby=groupby_column,
                 column=value_column,
                 operation=operation,
-                filters=filters
+                filters=st.session_state.filters
             )
 
             st.success("GroupBy KPI created")
@@ -278,6 +287,8 @@ if len(st.session_state.builder.kpis) > 0:
         engine = KPIEngine(filtered_df, config)
 
         results = engine.compute_all()
+        st.session_state.results = results
+        st.session_state.step = 5
 
         st.success("KPIs Computed")
 
@@ -286,3 +297,8 @@ if len(st.session_state.builder.kpis) > 0:
                 label=result["name"],
                 value=result["value"]
             )
+
+if st.session_state.step >= 5:
+    if st.button("Visualize KPIs"):
+        chart_paths = visualize_kpis(st.session_state.results)
+        st.subheader(f"Visualization saved to: {get_output_path()}")

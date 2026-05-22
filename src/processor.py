@@ -39,3 +39,22 @@ def normalize_columns(df):
     
     df.columns = new_columns
     return df
+
+def transform_to_numeric(df, column):
+    """Transform a column to numeric type and handle invalid values.
+
+    Converts the specified column to numeric, dropping rows with invalid values
+    and casting the remaining values to integers.
+    """
+    df[column] = pd.to_numeric(df[column], errors="coerce")
+    df = df.dropna(subset=[column])
+    df[column] = df[column].astype(int)
+
+    return df
+
+def preprocess_dates(df):
+    if "data" in df.columns:
+        df["data"] = pd.to_datetime(df["data"])
+    elif "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"])
+    return df

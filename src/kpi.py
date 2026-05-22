@@ -1,4 +1,5 @@
 import pandas as pd
+from src.processor import transform_to_numeric, preprocess_dates
 
 
 class KPIEngine:
@@ -151,8 +152,9 @@ class KPIEngine:
         if column in ("data", "date"):
             value = pd.to_datetime(value)
 
-        if isinstance(value, int) or isinstance(value, float):
+        if isinstance(value, int) or isinstance(value, float) or value.isdigit():
             df = transform_to_numeric(df, column)
+            value = int(value)
 
         if operator == "==":
             return df[df[column] == value]
@@ -180,24 +182,3 @@ class KPIEngine:
 
         else:
             raise ValueError(f"Unsupported operator: {operator}")
-
-
-
-def transform_to_numeric(df, column):
-    """Transform a column to numeric type and handle invalid values.
-
-    Converts the specified column to numeric, dropping rows with invalid values
-    and casting the remaining values to integers.
-    """
-    df[column] = pd.to_numeric(df[column], errors="coerce")
-    df = df.dropna(subset=[column])
-    df[column] = df[column].astype(int)
-
-    return df
-
-def preprocess_dates(df):
-    if "data" in df.columns:
-        df["data"] = pd.to_datetime(df["data"])
-    elif "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"])
-    return df
