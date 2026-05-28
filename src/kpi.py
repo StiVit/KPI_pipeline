@@ -85,7 +85,9 @@ class KPIEngine:
         column = kpi['column']
         operation = kpi['operation']
 
-        grouped = df.groupby(groupby_col)[column]
+        _temp_df = transform_to_numeric(df.copy(), column)
+
+        grouped = _temp_df.groupby(groupby_col)[column]
 
         if operation == "sum":
             return grouped.sum()
@@ -107,8 +109,8 @@ class KPIEngine:
             results (dict): Previously computed KPI results to reference.
 
         Returns:
-            The computed mixed value (rounded to 2 decimal places for division),
-            or None for division by zero.
+            The computed mixed value (scalar or Series). For division, rounded to
+            2 decimal places. Handles both scalar and group-by (Series) operations.
         """
         ref_kpi_1 = kpi["ref_kpi_1"]
         ref_kpi_2 = kpi["ref_kpi_2"]
@@ -122,6 +124,25 @@ class KPIEngine:
         val1 = results[ref_kpi_1]["value"]
         val2 = results[ref_kpi_2]["value"]
 
+        # Handle group-by operations (pandas Series)
+        if isinstance(val1, pd.Series) or isinstance(val2, pd.Series):
+            if operation == "add":
+                result = val1 + val2
+            elif operation == "subtract":
+                result = val1 - val2
+            elif operation == "multiply":
+                result = val1 * val2
+            elif operation == "divide":
+                result = val1 / val2
+                # Handle division by zero in Series
+                result = result.replace([float('inf'), -float('inf')], None)
+            else:
+                raise ValueError(f"Unsupported mixed operation: {operation}")
+            # Round numeric values for consistency
+            result = result.round(2) if operation == "divide" else result
+            return result
+
+        # Handle scalar operations
         if operation == "add":
             return val1 + val2
         elif operation == "subtract":

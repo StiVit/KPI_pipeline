@@ -293,10 +293,17 @@ if len(st.session_state.builder.kpis) > 0:
         st.success("KPIs Computed")
 
         for kpi_id, result in results.items():
-            st.metric(
-                label=result["name"],
-                value=result["value"]
-            )
+            kpi_name = result["name"]
+            kpi_value = result["value"]
+
+            if isinstance(kpi_value, pd.Series):
+                st.subheader(kpi_name)
+                st.dataframe(kpi_value)
+            else:
+                st.metric(
+                    label=kpi_name,
+                    value=kpi_value
+                )
 
 if st.session_state.step >= 5:
     if st.button("Visualize KPIs"):
