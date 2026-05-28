@@ -308,4 +308,8 @@ if len(st.session_state.builder.kpis) > 0:
 if st.session_state.step >= 5:
     if st.button("Visualize KPIs"):
         chart_paths = visualize_kpis(st.session_state.results)
-        st.subheader(f"Visualization saved to: {get_output_path()}")
+        valid_files = [p for p in chart_paths.values() if p]
+        if valid_files:
+            st.success(f"Saved {len(valid_files)} charts to {get_output_path()}")
+        else:
+            st.error("Failed to save charts. Check console for errors.")

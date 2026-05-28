@@ -7,15 +7,17 @@ from dotenv import load_dotenv
 
 def get_output_path():
     """Get the output charts path from .env file."""
-    load_dotenv()
+    env_path = os.path.join(os.path.dirname(__file__), '.env')
+    load_dotenv(env_path)
     return os.getenv("OUTPUT_PATH", "../output/charts")
 
 
 def ensure_output_folder():
     """Create the output folder if it doesn't exist."""
     path = get_output_path()
-    os.makedirs(path, exist_ok=True)
-    return path
+    abs_path = os.path.abspath(path)
+    os.makedirs(abs_path, exist_ok=True)
+    return abs_path
 
 
 def visualize_single_kpis(kpi_results, output_path):
@@ -62,7 +64,11 @@ def visualize_single_kpis(kpi_results, output_path):
 
     plt.tight_layout()
     filepath = os.path.join(output_path, "kpi_single_values.png")
-    plt.savefig(filepath, dpi=150, bbox_inches='tight')
+    try:
+        plt.savefig(filepath, dpi=150, bbox_inches='tight')
+    except Exception as e:
+        print(f"Error saving chart: {e}")
+        return None
     plt.close()
 
     return filepath
@@ -109,7 +115,11 @@ def visualize_groupby_kpi(kpi_name, kpi_series, output_path):
 
     safe_name = kpi_name.replace(' ', '_').replace('/', '_')
     filepath = os.path.join(output_path, f"{safe_name}.png")
-    plt.savefig(filepath, dpi=150, bbox_inches='tight')
+    try:
+        plt.savefig(filepath, dpi=150, bbox_inches='tight')
+    except Exception as e:
+        print(f"Error saving chart: {e}")
+        return None
     plt.close()
 
     return filepath
